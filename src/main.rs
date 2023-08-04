@@ -1,10 +1,10 @@
-use std::env;
 use cli::Reader;
+use std::env;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args = env::args();
 
-    let reader = Reader::new(&args).unwrap_or_else(|err| {
+    let reader = Reader::new(args).unwrap_or_else(|err| {
         eprintln!("Problem in parsing arguments: {}", err);
         std::process::exit(1);
     });

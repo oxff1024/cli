@@ -7,13 +7,20 @@ pub struct Reader {
 }
 
 impl Reader {
-    pub fn new(args: &[String]) -> Result<Reader, &str> {
-        if args.len() < 2 {
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
-        let case_sensitive: bool = env::var("case_sensitive").is_err();
+    pub fn new(mut args: env::Args) -> Result<Reader, &'static str> {
+        args.next();
+
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Did not receive query string"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Did not receive query string"),
+        };
+
+        let case_sensitive: bool = true;//env::var("case_sensitive").is_err();
 
         Ok(Reader {
             query,
@@ -38,27 +45,18 @@ impl Reader {
     }
 
     pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-        let mut results = Vec::<&str>::new();
-
-        for line in contents.lines() {
-            if line.contains(query) {
-                results.push(line)
-            }
-        }
-        results
+        contents
+            .lines()
+            .filter(|line| line.contains(query))
+            .collect()
     }
 
     pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
         let query = query.to_lowercase();
-        let mut results = Vec::<&str>::new();
-
-        for line in contents.lines() {
-            if line.to_lowercase().contains(&query) {
-                results.push(line);
-            }
-        }
-
-        results
+        contents
+            .lines()
+            .filter(|line| line.contains(query.to_lowercase().as_str()))
+            .collect()
     }
 }
 
